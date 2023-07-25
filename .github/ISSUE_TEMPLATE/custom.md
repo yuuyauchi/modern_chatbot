@@ -1,10 +1,27 @@
 ---
-name: Custom issue template
-about: Describe this issue template's purpose here.
-title: ''
-labels: ''
-assignees: ''
-
+name: 機能リクエスト
+about: 新しい機能の提案はこちら
+title: "[機能] "
+labels: enhancement
+assignees: your-username
 ---
 
+## 機能リクエストの内容
 
+提案する機能についての簡潔な説明をお願いします。
+
+## 期待する動作
+
+新しい機能に対する期待する動作を明確に説明してください。
+
+## 現在の問題点（あれば）
+
+現状の問題点や課題があれば、それについて説明してください。
+
+## 代替案（あれば）
+
+もし代替案がある場合は、それについて説明してください。
+
+## 追加の情報
+
+機能リクエストに関連する追加情報をこちらに記載してください。
