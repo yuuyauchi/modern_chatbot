@@ -16,10 +16,14 @@ RUN ./configure --enable-optimizations && make && make altinstall
 RUN ln -s /usr/local/bin/python3.9 /usr/local/bin/python
 RUN python --version
 
-ENV GIT_EMAIL yuuyauchi1998@example.com
-ENV GIT_NAME yuyauchi
-RUN git config --global user.email "${GIT_EMAIL}" && \
-    git config --global user.name "${GIT_NAME}"
+ENV GIT_EMAIL your_email@example.com
+ENV GIT_NAME your_name
+ENV ACCESS_TOKEN access_token
+# 適宜変更してください
+# ENV REPOGITORY_PATH "https://${GIT_NAME}:#{ACCESS_TOKEN}@github.com/${GIT_NAME}/modern_chatbot.git"
+# RUN git config --global user.email "${GIT_EMAIL}" && \
+#     git config --global user.name "${GIT_NAME}"
+#     git remote add origin REPOGITORY_PATH
 
 ENV username="user1"
 RUN useradd --create-home --shell /bin/bash -G sudo,root $username
