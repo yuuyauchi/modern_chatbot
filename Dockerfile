@@ -5,7 +5,17 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \ 
     zlib1g-dev \
     python3-pip \
-    git
+    git \
+    sudo \
+    bash \
+    openssh-client \
+    curl
+
+RUN wget https://nodejs.org/dist/v14.17.5/node-v14.17.5-linux-x64.tar.xz && \
+    tar -xvf node-v14.17.5-linux-x64.tar.xz && \
+    mv node-v14.17.5-linux-x64 /opt/node
+ENV PATH=/opt/node/bin:$PATH
+RUN npm install -g act
 
 RUN chmod 777 .
 RUN wget https://www.python.org/ftp/python/3.9.5/Python-3.9.5.tgz
@@ -20,10 +30,9 @@ COPY requirements.txt /root/src
 WORKDIR /root/src
 RUN pip install -r requirements.txt
 
-ENV username="user1"
-RUN useradd --create-home --shell /bin/bash -G sudo,root $username
-RUN echo 'sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-USER $username
-
-ENV PATH="/home/${username}/.local/bin:${PATH}"
+# ENV username="user1"
+# RUN useradd -p yy1998  --create-home --shell /bin/bash -G sudo,root $username
+# RUN echo 'sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# USER $username
+# ENV PATH="/home/${username}/.local/bin:${PATH}"
 WORKDIR /workspace
