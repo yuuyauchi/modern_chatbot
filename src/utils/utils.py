@@ -1,10 +1,7 @@
-import json                                 # 返却された検索結果の読み取りにつかう
-from googleapiclient.discovery import build # APIへのアクセスにつかう
+from googleapiclient.discovery import build
 
-# カスタム検索エンジンID
-CUSTOM_SEARCH_ENGINE_ID = "25b4f45d834604076"
-# API キー
-API_KEY = "AIzaSyB0kOllmst-jHSiAFYNqQL4Dqcrhw_FEgw"
+CUSTOM_SEARCH_ENGINE_ID = "ここにSearch engine IDを入力"
+API_KEY = "ここにCustom Search APIのAPIキーを入力"
 
 def get_search_engine_result(query: str) -> list[str]:
     
@@ -27,4 +24,3 @@ def get_search_engine_result(query: str) -> list[str]:
         urls.append(item['link'])
 
     return urls
-    
