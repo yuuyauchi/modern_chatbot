@@ -16,4 +16,4 @@ jobs:
         run: docker build -t my-python-image .
 
       - name: run pysen
-        run: docker run my-python-image pysen run
+        run: docker run my-python-image pysen run lint
