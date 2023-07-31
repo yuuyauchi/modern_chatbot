@@ -3,7 +3,7 @@
 {
 	"name": "python 3.9",
 	"remoteUser": "root",
-	"workspaceFolder": "/workspace/modern_chatbot",
+	"workspaceFolder": "/project",
 	"build": {
 		// Sets the run context to one level up instead of the .devcontainer folder.
 		"context": "..",
