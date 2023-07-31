@@ -26,4 +26,4 @@ RUN echo 'sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER $username
 
 ENV PATH="/home/${username}/.local/bin:${PATH}"
-WORKDIR /workspace
+WORKDIR /workspace/modern_chatbot
