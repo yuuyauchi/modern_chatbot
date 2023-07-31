@@ -1,0 +1,19 @@
+name: check_linter
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  lint:
+    name: lint with pysen
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t my-python-image .
+
+      - name: run pysen
+        run: docker run my-python-image pysen run lint

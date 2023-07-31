@@ -1,29 +1,34 @@
-FROM ubuntu
+FROM ubuntu:22.04
+
 RUN apt-get update && apt-get install -y \
     wget \
     build-essential \
     libssl-dev \ 
     zlib1g-dev \
-    python3-pip \
-    git
+    git \
+    openssh-client \
+    curl \
+    libffi-dev
 
-RUN chmod 777 .
-RUN wget https://www.python.org/ftp/python/3.9.5/Python-3.9.5.tgz
-RUN tar -xvf Python-3.9.5.tgz
-WORKDIR /Python-3.9.5
+RUN wget https://www.python.org/ftp/python/3.9.5/Python-3.9.5.tgz && \
+    tar -xvf Python-3.9.5.tgz && \
+    cd /Python-3.9.5 && \
+    ./configure --enable-optimizations && make && make altinstall
+
+RUN ln -s /usr/local/bin/python3.9 /usr/local/bin/python && \
+    ln -s /usr/local/bin/pip3.9 /usr/local/bin/pip
+
 RUN pip install --upgrade pip
-RUN ./configure --enable-optimizations && make && make altinstall
-RUN ln -s /usr/local/bin/python3.9 /usr/local/bin/python
-RUN python --version
-RUN mkdir -p /root/src
-COPY requirements.txt /root/src
-WORKDIR /root/src
+
+WORKDIR /project
+COPY ./requirements.txt /project/requirements.txt
 RUN pip install -r requirements.txt
+COPY . /project/
 
-ENV username="user1"
-RUN useradd --create-home --shell /bin/bash -G sudo,root $username
-RUN echo 'sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-USER $username
+# ENV username="user1"
+# RUN useradd -p yy1998  --create-home --shell /bin/bash -G sudo,root $username
+# RUN echo 'sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# USER $username
+# ENV PATH="/home/${username}/.local/bin:${PATH}"
 
-ENV PATH="/home/${username}/.local/bin:${PATH}"
 WORKDIR /workspace/modern_chatbot

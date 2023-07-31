@@ -1,0 +1,8 @@
+services:
+  modern_chatbot:
+    image: my-python-image
+    container_name: modern_chatbot
+    volumes:
+      - ./:/project
+    tty: true
+    command: bash
