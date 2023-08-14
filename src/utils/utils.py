@@ -1,10 +1,12 @@
+from typing import List
+
 from googleapiclient.discovery import build
 
 CUSTOM_SEARCH_ENGINE_ID = "ここにSearch engine IDを入力"
 API_KEY = "ここにCustom Search APIのAPIキーを入力"
 
 
-def get_search_engine_result(query: str) -> list[str]:
+def get_search_engine_result(query: str) -> List[str]:
     search = build("customsearch", "v1", developerKey=API_KEY)
 
     result = (
