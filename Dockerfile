@@ -10,13 +10,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     libffi-dev
 
-RUN wget https://www.python.org/ftp/python/3.9.5/Python-3.9.5.tgz && \
-    tar -xvf Python-3.9.5.tgz && \
-    cd /Python-3.9.5 && \
+RUN wget https://www.python.org/ftp/python/3.10.9/Python-3.10.9.tgz && \
+    tar -xvf Python-3.10.9.tgz && \
+    cd /Python-3.10.9 && \
     ./configure --enable-optimizations && make && make altinstall
 
-RUN ln -s /usr/local/bin/python3.9 /usr/local/bin/python && \
-    ln -s /usr/local/bin/pip3.9 /usr/local/bin/pip
+RUN ln -s /usr/local/bin/python3.10 /usr/local/bin/python && \
+    ln -s /usr/local/bin/pip3.10 /usr/local/bin/pip
 
 RUN pip install --upgrade pip
 
@@ -31,4 +31,4 @@ COPY . /project/
 # USER $username
 # ENV PATH="/home/${username}/.local/bin:${PATH}"
 
-WORKDIR /workspace/modern_chatbot
+WORKDIR /project/
