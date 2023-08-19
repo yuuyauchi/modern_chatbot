@@ -39,7 +39,10 @@ def get_player_list() -> None:
     file_path_list = []
     for href in hrefs:
         target = href.attrib["onclick"]
-        file_path = re.search(r"(?<=\')(.*?)(?=\')", target).group()
+        file_path_obj = re.search(r"(?<=\')(.*?)(?=\')", target)
+        if file_path_obj is None:
+            continue
+        file_path = file_path_obj.group()
         file_path_list.append(f"{domain}{file_path}")
 
     player_list = []
