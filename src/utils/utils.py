@@ -51,15 +51,15 @@ def get_player_list() -> None:
     for file_path in tqdm(file_path_list):
         r = session.get(file_path)
         try:
-            xpath_elements = r.html.xpath("//table[@class='player-detail']//td[@class='player-detail-name']")
+            xpath_elements = r.html.xpath(
+                "//table[@class='player-detail']//td[@class='player-detail-name']"
+            )
         except Exception as e:
             print(e)
             continue
         for xpath_element in xpath_elements:
             player_list.append(xpath_element.text)
-    dic = {
-        "player": list(set(player_list))
-    }
+    dic = {"player": list(set(player_list))}
 
     with open("data.json", "w") as json_file:
         json.dump(dic, json_file, ensure_ascii=False)
