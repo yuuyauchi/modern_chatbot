@@ -8,6 +8,11 @@ from lxml import html
 from requests_html import HTMLSession
 from tqdm import tqdm
 import os
+from langchain.document_loaders import UnstructuredURLLoader
+from langchain.vectorstores import Chroma
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.indexes import VectorstoreIndexCreator
+from langchain.text_splitter import CharacterTextSplitter
 
 os.environ["OPENAI_API_KEY"] = "..."
 
@@ -76,3 +81,7 @@ def get_input(file_name: str) -> List[str]:
     for urls in data["search_result"].values():
         url_list.extend(urls)
     return url_list
+
+urls = get_input("data.json")
+loader = UnstructuredURLLoader(urls=urls)
+print(loader.load())
