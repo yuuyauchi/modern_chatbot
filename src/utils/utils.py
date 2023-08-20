@@ -7,6 +7,9 @@ from googleapiclient.discovery import build
 from lxml import html
 from requests_html import HTMLSession
 from tqdm import tqdm
+import os
+
+os.environ["OPENAI_API_KEY"] = "..."
 
 CUSTOM_SEARCH_ENGINE_ID = "ここにSearch engine IDを入力"
 API_KEY = "ここにCustom Search APIのAPIキーを入力"
@@ -64,3 +67,12 @@ def get_player_list() -> None:
     with open("data.json", "w") as json_file:
         json.dump(dic, json_file, ensure_ascii=False)
     return
+
+def get_input(file_name: str) -> List[str]:
+    url_list = []
+    with open(file_name, 'r', encoding='utf-8') as json_file:
+        data = json.load(json_file)
+    
+    for urls in data["search_result"].values():
+        url_list.extend(urls)
+    return url_list
