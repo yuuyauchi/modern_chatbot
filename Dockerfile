@@ -12,13 +12,7 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \ 
     libreadline-dev \
     libsqlite3-dev \
-    llvm \
-    libncursesw5-dev \ 
-    xz-utils \
-    tk-dev \
-    libxml2-dev \
-    libxmlsec1-dev \
-    liblzma-dev
+    libmagic-dev
 
 RUN wget https://www.python.org/ftp/python/3.10.9/Python-3.10.9.tgz && \
     tar -xvf Python-3.10.9.tgz && \
@@ -41,4 +35,4 @@ COPY . /project/
 # USER $username
 # ENV PATH="/home/${username}/.local/bin:${PATH}"
 
-WORKDIR /project/
+WORKDIR /project

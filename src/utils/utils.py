@@ -1,6 +1,6 @@
 import json
 import re
-from typing import List
+from typing import List, Any
 
 import requests
 from googleapiclient.discovery import build
@@ -12,12 +12,23 @@ from langchain.document_loaders import UnstructuredURLLoader
 from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.indexes import VectorstoreIndexCreator
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
+import spacy
+from llama_index import SimpleWebPageReader, LLMPredictor, GPTVectorStoreIndex, ServiceContext
+from langchain.chat_models import ChatOpenAI
 
-os.environ["OPENAI_API_KEY"] = "..."
+from llama_index import SimpleWebPageReader
+from os.path import join, dirname
+from dotenv import load_dotenv
+import openai
+import sys
 
-CUSTOM_SEARCH_ENGINE_ID = "ここにSearch engine IDを入力"
-API_KEY = "ここにCustom Search APIのAPIキーを入力"
+# os.environ["OPENAI_API_KEY"] = "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"
+
+# os.environ.get("OPENAI_API_KEY")
+
+CUSTOM_SEARCH_ENGINE_ID = "a49acfd5c69f54121"
+API_KEY = "AIzaSyAs3rf-wkDlb7OcUWeLt9ZHjZ2wJfm70H8"
 
 
 def get_search_engine_result(query: str) -> List[str]:
@@ -75,13 +86,66 @@ def get_player_list() -> None:
 
 def get_input(file_name: str) -> List[str]:
     url_list = []
+    pdf_list = []
+    excel_list = []
+    output_list = []
     with open(file_name, 'r', encoding='utf-8') as json_file:
         data = json.load(json_file)
     
-    for urls in data["search_result"].values():
+    for urls in tqdm(data["search_result"].values()):
         url_list.extend(urls)
-    return url_list
 
+    for url in url_list:
+        if ".pdf" in url:
+            pdf_list.append(url)
+        elif ".xlsx" in url:
+            excel_list.append(url)
+        else:
+            output_list.append(url)
+    return output_list
+"""
 urls = get_input("data.json")
 loader = UnstructuredURLLoader(urls=urls)
-print(loader.load())
+# print(loader.load())
+
+class JapaneseCharacterTextSplitter(RecursiveCharacterTextSplitter):
+    def __init__(self, **kwargs: Any):
+        separators = ["\n\n", "\n", "。", "、", " ", ""]
+        super().__init__(separators=separators, **kwargs)
+
+text_splitter = JapaneseCharacterTextSplitter(
+)
+
+index = VectorstoreIndexCreator(
+    vectorstore_cls=Chroma,
+    embedding=OpenAIEmbeddings(),
+    text_splitter=text_splitter,
+).from_loaders([loader])
+"""
+
+"""
+query = "2023年の和田育の活躍を教えてください"
+nlp = spacy.load('ja_ginza_electra')
+doc = nlp(query)
+query = [ent.text for ent in doc.ents]
+urls = get_search_engine_result(query)
+"""
+load_dotenv(verbose=True)
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+openai.api_key = os.environ["OPENAI_API_KEY"]
+
+# urls = get_input("data.json")
+args = sys.argv
+query = args[1]
+nlp = spacy.load('ja_ginza_electra')
+doc = nlp(query)
+query = [ent.text for ent in doc.ents]
+print(query)
+urls = get_search_engine_result(query)
+documents = SimpleWebPageReader(html_to_text=True).load_data(urls)
+llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
+service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor)
+index = GPTVectorStoreIndex.from_documents(documents, service_context=service_context)
+index.set_index_id("vector_index")
+index.storage_context.persist('storage')
