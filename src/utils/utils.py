@@ -23,14 +23,6 @@ from dotenv import load_dotenv
 import openai
 import sys
 
-# os.environ["OPENAI_API_KEY"] = "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"
-
-# os.environ.get("OPENAI_API_KEY")
-
-CUSTOM_SEARCH_ENGINE_ID = "a49acfd5c69f54121"
-API_KEY = "AIzaSyAs3rf-wkDlb7OcUWeLt9ZHjZ2wJfm70H8"
-
-
 def get_search_engine_result(query: str) -> List[str]:
     search = build("customsearch", "v1", developerKey=API_KEY)
 
