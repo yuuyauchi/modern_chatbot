@@ -22,6 +22,7 @@ from os.path import join, dirname
 from dotenv import load_dotenv
 import openai
 import sys
+from llama_index.schema import Document
 
 def get_search_engine_result(query: str) -> List[str]:
     search = build("customsearch", "v1", developerKey=API_KEY)
@@ -95,47 +96,66 @@ def get_input(file_name: str) -> List[str]:
         else:
             output_list.append(url)
     return output_list
-"""
-urls = get_input("data.json")
-loader = UnstructuredURLLoader(urls=urls)
-# print(loader.load())
 
-class JapaneseCharacterTextSplitter(RecursiveCharacterTextSplitter):
-    def __init__(self, **kwargs: Any):
-        separators = ["\n\n", "\n", "。", "、", " ", ""]
-        super().__init__(separators=separators, **kwargs)
 
-text_splitter = JapaneseCharacterTextSplitter(
-)
+class CustomWebPageReader(SimpleWebPageReader):
+    def __init__(self, html_to_text: bool = False) -> None:
+        super().__init__(html_to_text=html_to_text)
+        self.html_to_text = html_to_text
+    
+    def load_data(self, urls: List[str]) -> List[Document]:
+        """Load data from the input directory.
 
-index = VectorstoreIndexCreator(
-    vectorstore_cls=Chroma,
-    embedding=OpenAIEmbeddings(),
-    text_splitter=text_splitter,
-).from_loaders([loader])
-"""
+        Args:
+            urls (List[str]): List of URLs to scrape.
 
-"""
-query = "2023年の和田育の活躍を教えてください"
-nlp = spacy.load('ja_ginza_electra')
-doc = nlp(query)
-query = [ent.text for ent in doc.ents]
-urls = get_search_engine_result(query)
-"""
+        Returns:
+            List[Document]: List of documents.
+
+        """
+        if not isinstance(urls, list):
+            raise ValueError("urls must be a list of strings.")
+        documents = []
+        for url in urls:
+            response = requests.get(url, headers=None).text
+            # link_list = re.findall(r'(?<=href=").*?(?=")', response)
+            # src_list = re.findall(r'(?<=src=").*?(?=")', response)
+            # title_list = re.findall(r'(?<=title=").*?(?=")', response)
+            # for src in src_list:
+            #     response = response.replace(src, "")
+            
+            # for link in link_list:
+            #     response = response.replace(link, "")
+            # for title in title_list:
+            #     response = response.replace(title, "")
+            if self._html_to_text:
+                import html2text
+
+                response = html2text.html2text(response)
+                response = re.sub(r"\n", "hogehogemaru", response)
+                link_list = re.findall(r"\(.*?\)", response)
+                for link in link_list:
+                    if link.count("(") == link.count(")"):
+                        response = response.replace(link, "")
+                
+                response = re.sub("hogehogemaru", r"\n", response)
+                response = re.sub(r"[\[\]]", "hogehogemaru", response)
+                open('fixed_response.txt', 'w').write(response)
+                import pdb;pdb.set_trace()
+            documents.append(Document(text=response))
+
+        return documents
 load_dotenv(verbose=True)
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-# urls = get_input("data.json")
-args = sys.argv
-query = args[1]
-nlp = spacy.load('ja_ginza_electra')
-doc = nlp(query)
-query = [ent.text for ent in doc.ents]
-print(query)
-urls = get_search_engine_result(query)
-documents = SimpleWebPageReader(html_to_text=True).load_data(urls)
+
+urls = [
+    "https://ja.wikipedia.org/wiki/%E3%83%AA%E3%82%AA%E3%83%8D%E3%83%AB%E3%83%BB%E3%83%A1%E3%83%83%E3%82%B7"
+]
+documents = CustomWebPageReader(html_to_text=True).load_data(urls)
+import pdb;pdb.set_trace()
 llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor)
 index = GPTVectorStoreIndex.from_documents(documents, service_context=service_context)

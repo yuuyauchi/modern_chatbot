@@ -24,10 +24,10 @@ RUN ln -s /usr/local/bin/python3.10 /usr/local/bin/python && \
 
 RUN pip install --upgrade pip
 
-WORKDIR /project
-COPY ./requirements.txt /project/requirements.txt
-RUN pip install -r requirements.txt
-COPY . /project/
+# WORKDIR /project
+# COPY ./requirements.txt /project/requirements.txt
+# RUN pip install -r requirements.txt
+# COPY . /project/
 
 # ENV username="user1"
 # RUN useradd -p yy1998  --create-home --shell /bin/bash -G sudo,root $username
