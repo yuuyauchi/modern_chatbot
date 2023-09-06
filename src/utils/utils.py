@@ -192,36 +192,17 @@ class OriginalTextSplitter(TokenTextSplitter):
         """
         new_splits = []
         for split in splits:
-            num_cur_tokens = len(self.tokenizer(split))
-            if num_cur_tokens <= chunk_size:
-                new_splits.append(split)
-            else:
-                cur_splits = [split]
-                cur_split = re.split(self._backup_separators, split)
-                # import pdb; pdb.set_trace()
-                new_splits.extend(cur_split)
-
-                cur_splits2 = []
-                for cur_split in cur_splits:
-                    num_cur_tokens = len(self.tokenizer(cur_split))
-                    if num_cur_tokens <= chunk_size:
-                        cur_splits2.extend([cur_split])
-                    else:
-                        # split cur_split according to chunk size of the token numbers
-                        cur_split_chunks = []
-                        end_idx = len(cur_split)
-                        while len(self.tokenizer(cur_split[0:end_idx])) > chunk_size:
-                            for i in range(1, end_idx):
-                                tmp_split = cur_split[0 : end_idx - i]
-                                if len(self.tokenizer(tmp_split)) <= chunk_size:
-                                    cur_split_chunks.append(tmp_split)
-                                    cur_split = cur_split[end_idx - i : end_idx]
-                                    end_idx = len(cur_split)
-                                    break
-                        cur_split_chunks.append(cur_split)
-                        cur_splits2.extend(cur_split_chunks)
-
-                new_splits.extend(cur_splits2)
+            cur_split = re.split(self._backup_separators, split)
+            for splitted_text in cur_split:
+                if len(splitted_text) <= chunk_size:
+                    new_splits.extend(splitted_text)
+                    continue
+                else:
+                    splitted_text = splitted_text[0:chunk_size]
+                    new_splits.extend(splitted_text)
+                    continue
+        # import pdb;pdb.set_trace()
+        # max(len(x) for x in new_splits)
         return new_splits
 
 load_dotenv(verbose=True)
