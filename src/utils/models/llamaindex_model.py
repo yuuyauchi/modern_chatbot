@@ -25,7 +25,7 @@ import sys
 from llama_index.schema import Document
 from llama_index.langchain_helpers.text_splitter import TokenTextSplitter
 from llama_index.node_parser import SimpleNodeParser
-from llama_index import SimpleDirectoryReader
+from llama_index import SimpleDirectoryReader, Response
 
 from dataclasses import dataclass
 from typing import Callable, List, Optional
@@ -38,78 +38,48 @@ from llama_index.callbacks.schema import CBEventType, EventPayload
 from llama_index.utils import globals_helper
 from llama_index.evaluation import DatasetGenerator, ResponseEvaluator
 
+import logging
+from typing import Callable, List, Optional
+
+# from llama_index.bridge.pydantic import Field, PrivateAttr
+
+from llama_index.callbacks.base import CallbackManager
+from llama_index.callbacks.schema import CBEventType, EventPayload
+from llama_index.constants import DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE
+from llama_index.utils import globals_helper
+
+import copy
+import logging
+import re
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from enum import Enum
+from typing import (
+    AbstractSet,
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypedDict,
+    TypeVar,
+    Union,
+    cast,
+)
+
+from langchain.docstore.document import Document
+from langchain.schema import BaseDocumentTransformer
+from llama_index.callbacks.base import CallbackManager
+
 import tinysegmenter
 segmenter = tinysegmenter.TinySegmenter()
 
-class OriginalTextSplitter(TokenTextSplitter):
-    def __init__(
-        self,
-        separator: str = " ",
-        chunk_size: int = DEFAULT_CHUNK_SIZE,
-        chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
-        tokenizer: Optional[Callable] = None,
-        backup_separators: str = "\n",
-        callback_manager: Optional[CallbackManager] = None,
-    ):
-        super().__init__(
-            separator=separator,
-            chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap,
-            tokenizer=tokenizer,
-            backup_separators=backup_separators,
-            callback_manager=callback_manager,
-        )
-        self._separator = separator
-        self._chunk_size = chunk_size
-        self._chunk_overlap = chunk_overlap
-        self.tokenizer = tokenizer or globals_helper.tokenizer
-        self._backup_separators = backup_separators
-        self.callback_manager = callback_manager or CallbackManager([])
-
-    def _preprocess_splits(self, splits: List[str], chunk_size: int) -> List[str]:
-        """Process splits.
-
-        Specifically search for tokens that are too large for chunk size,
-        and see if we can separate those tokens more
-        (via backup separators if specified, or force chunking).
-
-        """
-        segmenter = tinysegmenter.TinySegmenter()
-        new_splits = []
-        
-        for split in splits:
-            new_splits.extend(segmenter.tokenize(split))
-
-        new_splits = list(set(new_splits))
-        # import pdb;pdb.set_trace()
-        return new_splits
-
-class CustomWebPageReader(SimpleWebPageReader):
-    def __init__(self, html_to_text: bool = False) -> None:
-        super().__init__(html_to_text=html_to_text)
-        self.html_to_text = html_to_text
-    
-    def load_data(self, urls: List[str]) -> List[Document]:
-        """Load data from the input directory.
-
-        Args:
-            urls (List[str]): List of URLs to scrape.
-
-        Returns:
-            List[Document]: List of documents.
-
-        """
-        if not isinstance(urls, list):
-            raise ValueError("urls must be a list of strings.")
-        documents = []
-        for url in urls:
-            response = requests.get(url, headers=None).text
-            if self._html_to_text:
-                import html2text
-                response = html2text.html2text(response)
-            documents.append(Document(text=response))
-
-        return documents
 
 def display_eval_df(query: str, response: Response, eval_result: str) -> None:
     eval_df = pd.DataFrame(
@@ -139,14 +109,13 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 # TODO データ読み込み
 documents = SimpleDirectoryReader(input_dir="./data").load_data()
 # documents = CustomWebPageReader(html_to_text=True).load_data(urls)
-
+# import pdb;pdb.set_trace()
 # TODO データ前処理
-text_splitter = OriginalTextSplitter(
-    separator="。",
-    backup_separators="[\n、（）「」]",
+text_splitter = TinySegmenterTextSplitter(
+    separator="\n"
     chunk_size=100, 
     chunk_overlap=20
-    )
+)
 
 node_parser = SimpleNodeParser(
   text_splitter=text_splitter,
