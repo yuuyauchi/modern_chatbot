@@ -42,13 +42,13 @@ from llama_index.utils import globals_helper
 from utils.preprocessing.textsplit import TinySegmenterTextSplitter
 from utils.models.chatbot_base import ChatbotTrainingBase
 from utils.models.llamaindex_model import LlamaindexChatBot
-import pdb;pdb.set_trace()
+# import pdb;pdb.set_trace()
 model = LlamaindexChatBot()
-model.read()
-model.preprocess()
-model.train()
-model.evaluate()
-model.index.query(query)
+# model.read()
+# model.tokenize()
+# model.train()
+model.evaluate("llama_index_result.csv")
+# model.index.query(query)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

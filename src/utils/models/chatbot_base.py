@@ -7,7 +7,7 @@ class ChatbotTrainingBase(ABC):
         pass
 
     @abstractmethod
-    def preprocess(self, document):
+    def tokenize(self, document):
         pass
     
     @abstractmethod
