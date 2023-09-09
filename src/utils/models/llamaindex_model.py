@@ -126,7 +126,7 @@ class LlamaindexChatBot(ChatbotTrainingBase):
         
     def save_question_and_answer(self, file_name):
         data_generator = DatasetGenerator.from_documents(self.documents)
-        eval_questions = data_generator.generate_questions_from_nodes(100)
+        eval_questions = data_generator.generate_questions_from_nodes(50)
         eval_df = pd.DataFrame(
             {
                 "query": eval_questions,
@@ -136,12 +136,7 @@ class LlamaindexChatBot(ChatbotTrainingBase):
         eval_df.to_csv(file_name, index=False)
 
     def evaluate(self, file_name: str):
-        # import pdb;pdb.set_trace()
         df = pd.read_csv(file_name)
-        # llama_debug_handler = LlamaDebugHandler()
-        # callback_manager = CallbackManager([llama_debug_handler])
-        # service_context = ServiceContext.from_defaults(callback_manager=callback_manager)
-
         self.text_splitter = TinySegmenterTextSplitter(
             separator="。",
             chunk_size=100, 
@@ -162,7 +157,7 @@ class LlamaindexChatBot(ChatbotTrainingBase):
             vector_store=SimpleVectorStore.from_persist_dir(persist_dir=self.model_path),
             index_store=SimpleIndexStore.from_persist_dir(persist_dir=self.model_path),
         )
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
         vector_store_index = load_index_from_storage(storage_context, service_context=self.service_context)
         self.query_engine = vector_store_index.as_query_engine(service_context=self.service_context)
 
@@ -175,9 +170,8 @@ class LlamaindexChatBot(ChatbotTrainingBase):
             label = str(self.evaluator.evaluate(response))
             print(label)
             label_list.append(label)
-        # df["label"] = df["Response"].apply(lambda query: self.evaluator.evaluate(query))
-        import pdb;pdb.set_trace()
-        df["label"] = response_list
+        df["response"] = response_list
+        df["label"] = label_list
         df.to_csv(file_name, index=False)
 
     def save_model(self):

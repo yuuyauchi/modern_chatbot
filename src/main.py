@@ -44,9 +44,9 @@ from utils.models.chatbot_base import ChatbotTrainingBase
 from utils.models.llamaindex_model import LlamaindexChatBot
 # import pdb;pdb.set_trace()
 model = LlamaindexChatBot()
-# model.read()
-# model.tokenize()
-# model.train()
+model.read()
+model.tokenize()
+model.train()
 model.evaluate("llama_index_result.csv")
 # model.index.query(query)
 
