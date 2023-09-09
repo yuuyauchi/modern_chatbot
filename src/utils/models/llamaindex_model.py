@@ -76,9 +76,73 @@ from typing import (
 from langchain.docstore.document import Document
 from langchain.schema import BaseDocumentTransformer
 from llama_index.callbacks.base import CallbackManager
-
+from utils.models.chatbot_base import ChatbotTrainingBase
 import tinysegmenter
+from utils.preprocessing.textsplit import TinySegmenterTextSplitter
+from utils.utils import setting
+import pandas as pd
+
+
 segmenter = tinysegmenter.TinySegmenter()
+
+env = setting()
+openai.api_key = env["OPENAI_API_KEY"]
+
+@dataclass
+class LlamaindexChatBot(ChatbotTrainingBase):
+    data_path: str = "/workspaces/modern_chatbot/data"
+    model_name: str = "gpt-3.5-turbo"
+    model_path: str = "llama_index_storage"
+
+    def read(self):
+        self.documents = SimpleDirectoryReader(input_dir=self.data_path).load_data()
+
+    def preprocess(self):
+        self.text_splitter = TinySegmenterTextSplitter(
+            separator="。",
+            chunk_size=100, 
+            chunk_overlap=20
+        )
+
+        self.node_parser = SimpleNodeParser(
+            text_splitter=self.text_splitter,
+        )
+
+    def train(self):
+        llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name=self.model_name))
+        self.service_context = ServiceContext.from_defaults(
+            llm_predictor=llm_predictor,
+            node_parser=self.node_parser
+        )
+        self.index = GPTVectorStoreIndex.from_documents(self.documents, service_context=self.service_context)
+        self.index = self.index.as_query_engine(service_context=self.service_context)
+
+    def save_eval_df(self, query: list) -> None:
+        eval_df = pd.DataFrame({"Query": query})
+        eval_df["Response"] = eval_df["Query"].apply(lambda query: self.index.query(query))
+        eval_df["Evaluation Result"] = eval_df["Response"].apply(lambda response: self.evaluator.evaluate(response))
+        eval_df["Response"] = eval_df["Response"].astype(str)
+        import pdb;pdb.set_trace()
+        eval_df.to_csv("result.csv", index=False)
+
+    def evaluate(self):
+        data_generator = DatasetGenerator.from_documents(self.documents)
+        eval_questions = data_generator.generate_questions_from_nodes()
+        eval_df = pd.DataFrame(
+            {
+                "Query": eval_questions
+            }
+        )
+        eval_df["Response"] = eval_df["Query"].apply(lambda query: self.index.query(query))
+        eval_df.to_csv("result.csv", index=False)
+        import pdb;pdb.set_trace()
+        self.evaluator = ResponseEvaluator(service_context=self.service_context)
+        self.save_eval_df(eval_questions)
+        import pdb;pdb.set_trace()
+
+    def save_model(self):
+        self.index.set_index_id("vector_index")
+        self.index.storage_context.persist(self.model_path)
 
 
 def display_eval_df(query: str, response: Response, eval_result: str) -> None:
@@ -99,45 +163,3 @@ def display_eval_df(query: str, response: Response, eval_result: str) -> None:
         subset=["Response", "Source"]
     )
     display(eval_df)
-
-# TODO 外部から読み込む
-load_dotenv(verbose=True)
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
-openai.api_key = os.environ["OPENAI_API_KEY"]
-
-# TODO データ読み込み
-documents = SimpleDirectoryReader(input_dir="./data").load_data()
-# documents = CustomWebPageReader(html_to_text=True).load_data(urls)
-# import pdb;pdb.set_trace()
-# TODO データ前処理
-text_splitter = TinySegmenterTextSplitter(
-    separator="\n"
-    chunk_size=100, 
-    chunk_overlap=20
-)
-
-node_parser = SimpleNodeParser(
-  text_splitter=text_splitter,
-)
-
-llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
-service_context = ServiceContext.from_defaults(
-    llm_predictor=llm_predictor,
-    node_parser=node_parser
-)
-evaluator = ResponseEvaluator(service_context=service_context)
-index = GPTVectorStoreIndex.from_documents(documents, service_context=service_context)
-
-query = "2023年３月にリオネルメッシはどのクラブに所属していますか？"
-# query = "Which football club signed a contract with Messi in 2023"
-index = index.as_query_engine(service_context=service_context)
-response = index.query(query)
-print(response)
-import pdb;pdb.set_trace()
-data_generator = DatasetGenerator.from_documents(documents)
-eval_questions = data_generator.generate_questions_from_nodes()
-eval_result = evaluator.evaluate(response)
-print(str(eval_result))
-index.set_index_id("vector_index")
-index.storage_context.persist('storage')

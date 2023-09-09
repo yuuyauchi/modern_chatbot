@@ -95,6 +95,7 @@ class TextSplit:
 class TinySegmenterTextSplitter(BaseDocumentTransformer, ABC):
     def __init__(
         self,
+        separator: str = " ",
         chunk_size: int = DEFAULT_CHUNK_SIZE,
         chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
         callback_manager: Optional[CallbackManager] = None,
