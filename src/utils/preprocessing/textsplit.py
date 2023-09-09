@@ -1,83 +1,17 @@
-import json
-import re
-from typing import List, Any
-
-import requests
-from googleapiclient.discovery import build
-from lxml import html
-from requests_html import HTMLSession
-from tqdm import tqdm
-import os
-from langchain.document_loaders import UnstructuredURLLoader
-from langchain.vectorstores import Chroma
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.indexes import VectorstoreIndexCreator
-from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
-import spacy
-from llama_index import SimpleWebPageReader, LLMPredictor, GPTVectorStoreIndex, ServiceContext
-from langchain.chat_models import ChatOpenAI
-
-from llama_index import SimpleWebPageReader
-from os.path import join, dirname
-from dotenv import load_dotenv
-import openai
-import sys
-from llama_index.schema import Document
-from llama_index.langchain_helpers.text_splitter import TokenTextSplitter
-from llama_index.node_parser import SimpleNodeParser
-from llama_index import SimpleDirectoryReader, Response
-
-from dataclasses import dataclass
-from typing import Callable, List, Optional
-
-from llama_index.constants import DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE
-from llama_index.bridge.langchain import TextSplitter
-
-from llama_index.callbacks.base import CallbackManager
-from llama_index.callbacks.schema import CBEventType, EventPayload
-from llama_index.utils import globals_helper
-from llama_index.evaluation import DatasetGenerator, ResponseEvaluator
-
-import logging
-from typing import Callable, List, Optional
-
-# from llama_index.bridge.pydantic import Field, PrivateAttr
-
-from llama_index.callbacks.base import CallbackManager
-from llama_index.callbacks.schema import CBEventType, EventPayload
-from llama_index.constants import DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE
-from llama_index.utils import globals_helper
-
 import copy
-import logging
-import re
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
-from enum import Enum
-from typing import (
-    AbstractSet,
-    Any,
-    Callable,
-    Collection,
-    Dict,
-    Iterable,
-    List,
-    Literal,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    TypedDict,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Iterable, List, Optional, Sequence
 
+import logger
+import tinysegmenter
 from langchain.docstore.document import Document
 from langchain.schema import BaseDocumentTransformer
 from llama_index.callbacks.base import CallbackManager
+from llama_index.callbacks.schema import CBEventType, EventPayload
+from llama_index.constants import DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE
 
-import tinysegmenter
+# from llama_index.bridge.pydantic import Field, PrivateAttr
 
 
 @dataclass
@@ -91,6 +25,7 @@ class TextSplit:
 
     text_chunk: str
     num_char_overlap: Optional[int] = None
+
 
 class TinySegmenterTextSplitter(BaseDocumentTransformer, ABC):
     def __init__(
@@ -229,7 +164,9 @@ class TinySegmenterTextSplitter(BaseDocumentTransformer, ABC):
                 while cur_total > self._chunk_overlap and start_idx < cur_idx:
                     # # call tokenizer on entire overlap
                     # cur_total = self.tokenizer()
-                    cur_num_tokens = max(len(self.tokenizer.tokenize(splits[start_idx])), 1)
+                    cur_num_tokens = max(
+                        len(self.tokenizer.tokenize(splits[start_idx])), 1
+                    )
                     cur_total -= cur_num_tokens
                     start_idx += 1
                 # NOTE: This is a hack, make more general
@@ -278,7 +215,7 @@ class TinySegmenterTextSplitter(BaseDocumentTransformer, ABC):
                 new_doc = Document(page_content=chunk, metadata=metadata)
                 documents.append(new_doc)
         return documents
-    
+
     def split_documents(self, documents: Iterable[Document]) -> List[Document]:
         """Split documents."""
         texts, metadatas = [], []

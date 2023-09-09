@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-class ChatbotTrainingBase(ABC):
 
+class ChatbotTrainingBase(ABC):
     @abstractmethod
     def read(self):
         pass
@@ -9,7 +9,7 @@ class ChatbotTrainingBase(ABC):
     @abstractmethod
     def tokenize(self, document):
         pass
-    
+
     @abstractmethod
     def train(self, documents, node_parser):
         pass
@@ -17,5 +17,3 @@ class ChatbotTrainingBase(ABC):
     @abstractmethod
     def evaluate(self):
         pass
-
-    
