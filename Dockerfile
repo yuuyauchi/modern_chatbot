@@ -26,8 +26,9 @@ RUN pip install --upgrade pip
 
 WORKDIR /project
 COPY . /project/
+RUN pip install pysen isort flake8 black
 # COPY ./requirements.txt /project/requirements.txt
-RUN pip install -r requirements.txt
+# RUN pip install -r requirements.txt
 # COPY . /project/
 
 # ENV username="user1"
