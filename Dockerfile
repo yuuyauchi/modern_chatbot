@@ -26,7 +26,7 @@ RUN pip install --upgrade pip
 
 WORKDIR /project
 COPY . /project/
-RUN pip install pysen isort flake8 black
+RUN pip install pysen isort flake8 black mypy
 # COPY ./requirements.txt /project/requirements.txt
 # RUN pip install -r requirements.txt
 # COPY . /project/
