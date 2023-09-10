@@ -24,8 +24,8 @@ RUN ln -s /usr/local/bin/python3.10 /usr/local/bin/python && \
 
 RUN pip install --upgrade pip
 
-# WORKDIR /project
-# COPY ./requirements.txt /project/requirements.txt
+WORKDIR /project
+COPY ./requirements.txt /project/requirements.txt
 RUN pip install -r requirements.txt
 # COPY . /project/
 
