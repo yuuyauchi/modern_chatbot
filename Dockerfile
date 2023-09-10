@@ -26,7 +26,7 @@ RUN pip install --upgrade pip
 
 # WORKDIR /project
 # COPY ./requirements.txt /project/requirements.txt
-# RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt
 # COPY . /project/
 
 # ENV username="user1"
