@@ -1,15 +1,27 @@
 import json
+import os
 import re
+from os.path import dirname, join
 from typing import List
 
 import requests
+from dotenv import load_dotenv
 from googleapiclient.discovery import build
 from lxml import html
 from requests_html import HTMLSession
 from tqdm import tqdm
 
-CUSTOM_SEARCH_ENGINE_ID = "ここにSearch engine IDを入力"
-API_KEY = "ここにCustom Search APIのAPIキーを入力"
+
+def setting():
+    load_dotenv(verbose=True)
+    dotenv_path = join(dirname(__file__), ".env")
+    load_dotenv(dotenv_path)
+    return os.environ
+
+
+env = setting()
+API_KEY = env["API_KEY"]
+CUSTOM_SEARCH_ENGINE_ID = env["CUSTOM_SEARCH_ENGINE_ID"]
 
 
 def get_search_engine_result(query: str) -> List[str]:
@@ -64,3 +76,24 @@ def get_player_list() -> None:
     with open("data.json", "w") as json_file:
         json.dump(dic, json_file, ensure_ascii=False)
     return
+
+
+def get_input(file_name: str) -> List[str]:
+    url_list = []
+    pdf_list = []
+    excel_list = []
+    output_list = []
+    with open(file_name, "r", encoding="utf-8") as json_file:
+        data = json.load(json_file)
+
+    for urls in tqdm(data["search_result"].values()):
+        url_list.extend(urls)
+
+    for url in url_list:
+        if ".pdf" in url:
+            pdf_list.append(url)
+        elif ".xlsx" in url:
+            excel_list.append(url)
+        else:
+            output_list.append(url)
+    return output_list

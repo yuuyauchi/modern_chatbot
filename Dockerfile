@@ -8,7 +8,11 @@ RUN apt-get update && apt-get install -y \
     git \
     openssh-client \
     curl \
-    libffi-dev
+    libffi-dev \
+    libbz2-dev \ 
+    libreadline-dev \
+    libsqlite3-dev \
+    libmagic-dev
 
 RUN wget https://www.python.org/ftp/python/3.10.9/Python-3.10.9.tgz && \
     tar -xvf Python-3.10.9.tgz && \
@@ -21,9 +25,11 @@ RUN ln -s /usr/local/bin/python3.10 /usr/local/bin/python && \
 RUN pip install --upgrade pip
 
 WORKDIR /project
-COPY ./requirements.txt /project/requirements.txt
-RUN pip install -r requirements.txt
 COPY . /project/
+RUN pip install pysen isort flake8 black mypy
+# COPY ./requirements.txt /project/requirements.txt
+# RUN pip install -r requirements.txt
+# COPY . /project/
 
 # ENV username="user1"
 # RUN useradd -p yy1998  --create-home --shell /bin/bash -G sudo,root $username
@@ -31,4 +37,4 @@ COPY . /project/
 # USER $username
 # ENV PATH="/home/${username}/.local/bin:${PATH}"
 
-WORKDIR /project/
+WORKDIR /project
