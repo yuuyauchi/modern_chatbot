@@ -1,50 +1,31 @@
-ARG UBUNTU_VER=20.04
+FROM ubuntu:22.04
 
-FROM ubuntu:$UBUNTU_VER
-
-ENV TZ=Asia/Tokyo
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# change apt repository to japan server
-ARG APT_SERVER=http://ftp.jaist.ac.jp/pub/Linux/ubuntu/
-RUN sed -i.bak -e "s%http://[^ ]\+%${APT_SERVER}%g" /etc/apt/sources.list
-
-# Avoid dialog popup in apt command
-# ref: https://docs.docker.jp/engine/faq.html#dockerfile-debian-frontend-noninteractive
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    sudo \
+RUN apt-get update && apt-get install -y \
     wget \
+    build-essential \
+    libssl-dev \ 
+    zlib1g-dev \
     git \
-    vim \
-    silversearcher-ag \
-    python3-dev \
-    python3-pip \
-    p7zip-full \
-    && apt clean \
-    && rm -Rf /var/lib/apt/lists/*
+    openssh-client \
+    curl \
+    libffi-dev \
+    libbz2-dev \ 
+    libreadline-dev \
+    libsqlite3-dev \
+    libmagic-dev
 
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN wget https://www.python.org/ftp/python/3.10.9/Python-3.10.9.tgz && \
+    tar -xvf Python-3.10.9.tgz && \
+    cd /Python-3.10.9 && \
+    ./configure --enable-optimizations && make && make altinstall
 
-# install dockerfile linter
-ARG hadolint_bin_url=https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
-RUN wget --progress=dot:giga -O /bin/hadolint ${hadolint_bin_url} \
-    && chmod a+x /bin/hadolint
+RUN ln -s /usr/local/bin/python3.10 /usr/local/bin/python && \
+    ln -s /usr/local/bin/pip3.10 /usr/local/bin/pip
 
-ARG username="user0"
-RUN useradd --create-home --shell /bin/bash -G sudo,root ${username} \
-    && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-USER ${username}
-ENV PATH="/home/${username}/.local/bin:${PATH}"
+RUN pip install --upgrade pip
 
-RUN python -m pip install --no-cache-dir --user --upgrade pip \
-    && python -m pip install --no-cache-dir --user --upgrade setuptools wheel \
-    && python -m pip install --no-cache-dir --user --upgrade \
-        black \
-        flake8 \
-        isort \
-        mypy \
-        pysen \
-        python-dateutil \
-        tqdm
-
-WORKDIR /home/${username}/work
+RUN pip install pysen \ 
+    isort \
+    flake8 \
+    black \
+    mypy
