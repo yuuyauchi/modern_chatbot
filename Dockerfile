@@ -26,7 +26,21 @@ RUN pip install --upgrade pip
 
 WORKDIR /project
 COPY . /project/
-RUN pip install pysen isort flake8 black mypy
+RUN pip install pysen \
+    isort \
+    flake8 \
+    black \
+    mypy \
+    openai \
+    llama-index  \
+    langchain \
+    tinysegmenter \
+    logger \
+    python-dotenv \
+    google-api-python-client \
+    lxml \
+    requests_html  \
+    requests 
 # COPY ./requirements.txt /project/requirements.txt
 # RUN pip install -r requirements.txt
 # COPY . /project/
