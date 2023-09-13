@@ -39,5 +39,5 @@ RUN pip install pysen \
     lxml \
     requests_html  \
     requests 
-
-WORKDIR workspaces
+WORKDIR /workspaces/modern_chatbot
+COPY . /workspaces/modern_chatbot/
