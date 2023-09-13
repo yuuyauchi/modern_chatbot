@@ -38,6 +38,9 @@ RUN pip install pysen \
     google-api-python-client \
     lxml \
     requests_html  \
-    requests 
+    requests  \
+    wikipedia
+
 WORKDIR /workspaces/modern_chatbot
 COPY . /workspaces/modern_chatbot/
+

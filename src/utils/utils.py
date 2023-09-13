@@ -5,11 +5,14 @@ from os.path import dirname, join
 from typing import List
 
 import requests
+import wikipedia
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
 from lxml import html
 from requests_html import HTMLSession
 from tqdm import tqdm
+
+wikipedia.set_lang("jp")
 
 
 def setting():
@@ -97,3 +100,12 @@ def get_input(file_name: str) -> List[str]:
         else:
             output_list.append(url)
     return output_list
+
+
+def get_article_data_from_wikipedia(keyword: str) -> None:
+    words = wikipedia.search(keyword)
+    for word in words:
+        if keyword == word:
+            content = wikipedia.page(words[0]).content
+            open(f"{keyword}.txt", "w").write(content)
+            break

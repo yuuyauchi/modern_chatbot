@@ -32,7 +32,7 @@ openai.api_key = env["OPENAI_API_KEY"]
 
 @dataclass
 class LlamaindexChatBot(ChatbotTrainingBase):
-    data_path: str = "/workspaces/modern_chatbot/data"
+    data_path: str = "data"
     model_name: str = "gpt-3.5-turbo"
     model_path: str = "llama_index_storage"
 
@@ -40,13 +40,9 @@ class LlamaindexChatBot(ChatbotTrainingBase):
         self.documents = SimpleDirectoryReader(input_dir=self.data_path).load_data()
 
     def tokenize(self):
-        self.text_splitter = TinySegmenterTextSplitter(
-            separator="。", chunk_size=100, chunk_overlap=20
-        )
+        self.text_splitter = TinySegmenterTextSplitter()
 
-        self.node_parser = SimpleNodeParser(
-            text_splitter=self.text_splitter,
-        )
+        self.node_parser = SimpleNodeParser(text_splitter=self.text_splitter)
         llm_predictor = LLMPredictor(
             llm=ChatOpenAI(temperature=0, model_name=self.model_name)
         )
