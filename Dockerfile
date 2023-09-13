@@ -39,3 +39,5 @@ RUN pip install pysen \
     lxml \
     requests_html  \
     requests 
+
+WORKDIR workspaces
