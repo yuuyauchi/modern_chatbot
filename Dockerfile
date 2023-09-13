@@ -51,4 +51,4 @@ RUN pip install pysen \
 # USER $username
 # ENV PATH="/home/${username}/.local/bin:${PATH}"
 
-WORKDIR /project
+# WORKDIR /project
