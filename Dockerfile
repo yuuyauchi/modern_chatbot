@@ -24,8 +24,6 @@ RUN ln -s /usr/local/bin/python3.10 /usr/local/bin/python && \
 
 RUN pip install --upgrade pip
 
-WORKDIR /project
-COPY . /project/
 RUN pip install pysen \
     isort \
     flake8 \
@@ -41,14 +39,7 @@ RUN pip install pysen \
     lxml \
     requests_html  \
     requests 
-# COPY ./requirements.txt /project/requirements.txt
-# RUN pip install -r requirements.txt
-# COPY . /project/
 
-# ENV username="user1"
-# RUN useradd -p yy1998  --create-home --shell /bin/bash -G sudo,root $username
-# RUN echo 'sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-# USER $username
-# ENV PATH="/home/${username}/.local/bin:${PATH}"
+WORKDIR /workspaces/modern_chatbot
+COPY . /workspaces/modern_chatbot/
 
-# WORKDIR /project
