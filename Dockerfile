@@ -24,8 +24,18 @@ RUN ln -s /usr/local/bin/python3.10 /usr/local/bin/python && \
 
 RUN pip install --upgrade pip
 
-RUN pip install pysen \ 
+RUN pip install pysen \
     isort \
     flake8 \
     black \
-    mypy
+    mypy \
+    openai \
+    llama-index  \
+    langchain \
+    tinysegmenter \
+    logger \
+    python-dotenv \
+    google-api-python-client \
+    lxml \
+    requests_html  \
+    requests 
