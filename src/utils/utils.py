@@ -109,3 +109,28 @@ def get_article_data_from_wikipedia(keyword: str) -> None:
             content = wikipedia.page(words[0]).content
             open(f"{keyword}.txt", "w").write(content)
             break
+
+
+def get_youtube_video_urls(channel_id: str) -> List[str]:
+    API_VER = "v3"
+    youtube = build("youtube", API_VER, developerKey=API_KEY)
+
+    search_response = (
+        youtube.search()
+        .list(
+            channelId=channel_id,
+            part="snippet",
+            order="date",
+            maxResults=50,
+        )
+        .execute()
+    )
+
+    url_list = []
+    youtube_url = "https://www.youtube.com/watch?v="
+    for response in search_response["items"]:
+        if response["id"]["kind"] != "youtube#video":
+            continue
+        video_url = youtube_url + response["id"]["videoId"]
+        url_list.append(video_url)
+    return url_list
