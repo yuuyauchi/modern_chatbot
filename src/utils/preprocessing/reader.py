@@ -1,10 +1,30 @@
 from typing import List
 
 import requests
+from llama_hub.youtube_transcript import YoutubeTranscriptReader, is_youtube_video
 from llama_index import SimpleWebPageReader
-
-# from langchain.docstore.document import Document
 from llama_index.schema import Document
+from utils.utils import get_youtube_video_urls
+
+
+class YoutubeReader:
+    def __init__(self):
+        pass
+
+    def get_video_from_channel_id(self, channel_id: str):
+        self.urls = get_youtube_video_urls(channel_id)
+
+    def check_url(self) -> None:
+        for url in self.urls:
+            if is_youtube_video(url):
+                continue
+            else:
+                print(url)
+
+    def get_documents(self) -> Document:
+        loader = YoutubeTranscriptReader()
+        documents = loader.load_data(ytlinks=self.urls, languages=["ja"])
+        return documents
 
 
 class CustomWebPageReader(SimpleWebPageReader):
