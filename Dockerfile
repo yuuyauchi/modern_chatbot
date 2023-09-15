@@ -39,7 +39,9 @@ RUN pip install pysen \
     lxml \
     requests_html  \
     requests  \
-    wikipedia
+    wikipedia \
+    youtube_transcript_api \
+    llama_hub
 
 WORKDIR /workspaces/modern_chatbot
 COPY . /workspaces/modern_chatbot/
