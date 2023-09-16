@@ -23,9 +23,6 @@ from utils.models.chatbot_base import ChatbotTrainingBase
 from utils.preprocessing.textsplit import TinySegmenterTextSplitter
 from utils.utils import setting
 
-# from llama_index.bridge.pydantic import Field, PrivateAttr
-
-
 segmenter = tinysegmenter.TinySegmenter()
 
 env = setting()
@@ -111,15 +108,9 @@ class LlamaindexChatBot(ChatbotTrainingBase):
             llm_predictor=llm_predictor, node_parser=node_parser
         )
         storage_context = StorageContext.from_defaults(
-            docstore=SimpleDocumentStore.from_persist_dir(
-                persist_dir="llama_index_storage"
-            ),
-            vector_store=SimpleVectorStore.from_persist_dir(
-                persist_dir="llama_index_storage"
-            ),
-            index_store=SimpleIndexStore.from_persist_dir(
-                persist_dir="llama_index_storage"
-            ),
+            docstore=SimpleDocumentStore.from_persist_dir(persist_dir="storage"),
+            vector_store=SimpleVectorStore.from_persist_dir(persist_dir="storage"),
+            index_store=SimpleIndexStore.from_persist_dir(persist_dir="storage"),
         )
         vector_store_index = load_index_from_storage(
             storage_context, service_context=service_context
