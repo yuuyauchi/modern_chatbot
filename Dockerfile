@@ -41,7 +41,8 @@ RUN pip install pysen \
     requests  \
     wikipedia \
     youtube_transcript_api \
-    llama_hub
+    llama_hub \
+    streamlit
 
 WORKDIR /workspaces/modern_chatbot
 COPY . /workspaces/modern_chatbot/
