@@ -12,7 +12,9 @@ from llama_index import (
     StorageContext,
     load_index_from_storage,
 )
+from llama_index.constants import DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE
 from llama_index.evaluation import DatasetGenerator, ResponseEvaluator
+from llama_index.langchain_helpers.text_splitter import TokenTextSplitter
 from llama_index.node_parser import SimpleNodeParser
 from llama_index.storage.docstore import SimpleDocumentStore
 from llama_index.storage.index_store import SimpleIndexStore
@@ -20,9 +22,6 @@ from llama_index.vector_stores import SimpleVectorStore
 from utils.models.chatbot_base import ChatbotTrainingBase
 from utils.preprocessing.textsplit import TinySegmenterTextSplitter
 from utils.utils import setting
-
-# from llama_index.bridge.pydantic import Field, PrivateAttr
-
 
 segmenter = tinysegmenter.TinySegmenter()
 
@@ -34,13 +33,18 @@ openai.api_key = env["OPENAI_API_KEY"]
 class LlamaindexChatBot(ChatbotTrainingBase):
     data_path: str = "data"
     model_name: str = "gpt-3.5-turbo"
-    model_path: str = "llama_index_storage"
+    model_path: str = "storage"
 
     def read(self):
         self.documents = SimpleDirectoryReader(input_dir=self.data_path).load_data()
 
     def tokenize(self):
-        self.text_splitter = TinySegmenterTextSplitter()
+        self.text_splitter = TokenTextSplitter(
+            separator="。",
+            chunk_size=DEFAULT_CHUNK_SIZE,
+            chunk_overlap=DEFAULT_CHUNK_OVERLAP,
+            backup_separators=["、", "\n"],
+        )
 
         self.node_parser = SimpleNodeParser(text_splitter=self.text_splitter)
         llm_predictor = LLMPredictor(
@@ -91,6 +95,30 @@ class LlamaindexChatBot(ChatbotTrainingBase):
             lambda response: str(self.evaluator.evaluate(response))
         )
         df.to_csv(file_name, index=False)
+
+    @classmethod
+    def deploy(cls):
+        text_splitter = TinySegmenterTextSplitter()
+
+        node_parser = SimpleNodeParser(text_splitter=text_splitter)
+        llm_predictor = LLMPredictor(
+            llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
+        )
+        service_context = ServiceContext.from_defaults(
+            llm_predictor=llm_predictor, node_parser=node_parser
+        )
+        storage_context = StorageContext.from_defaults(
+            docstore=SimpleDocumentStore.from_persist_dir(persist_dir="storage"),
+            vector_store=SimpleVectorStore.from_persist_dir(persist_dir="storage"),
+            index_store=SimpleIndexStore.from_persist_dir(persist_dir="storage"),
+        )
+        vector_store_index = load_index_from_storage(
+            storage_context, service_context=service_context
+        )
+        query_engine = vector_store_index.as_query_engine(
+            service_context=service_context
+        )
+        return query_engine
 
     def save_model(self):
         # self.index.set_index_id("vector_index")
