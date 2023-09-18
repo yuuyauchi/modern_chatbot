@@ -11,6 +11,7 @@ from googleapiclient.discovery import build
 from lxml import html
 from requests_html import HTMLSession
 from tqdm import tqdm
+from youtube_transcript_api import YouTubeTranscriptApi
 
 wikipedia.set_lang("jp")
 
@@ -109,9 +110,11 @@ def get_article_data_from_wikipedia(keyword: str) -> None:
             content = wikipedia.page(words[0]).content
             open(f"{keyword}.txt", "w").write(content)
             break
+    print("keyword", keyword)
+    print("words", words)
 
 
-def get_youtube_video_urls(channel_id: str) -> List[str]:
+def get_youtube_video_ids(channel_id: str) -> List[str]:
     API_VER = "v3"
     youtube = build("youtube", API_VER, developerKey=API_KEY)
 
@@ -126,11 +129,23 @@ def get_youtube_video_urls(channel_id: str) -> List[str]:
         .execute()
     )
 
-    url_list = []
-    youtube_url = "https://www.youtube.com/watch?v="
+    video_list = []
     for response in search_response["items"]:
         if response["id"]["kind"] != "youtube#video":
             continue
-        video_url = youtube_url + response["id"]["videoId"]
-        url_list.append(video_url)
-    return url_list
+        video_url = response["id"]["videoId"]
+        video_list.append(video_url)
+    return video_list
+
+
+def generate_data_from_youtube(channel_id: str) -> None:
+    video_ids = get_youtube_video_ids(channel_id)
+    for video_id in video_ids:
+        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        for transcript in transcript_list:
+            transcript_dict = transcript.translate("ja").fetch()
+            script_list = []
+            for text_dict in transcript_dict:
+                script_list.append(text_dict["text"])
+            script = "".join(script_list)
+            open(f"data/{video_id}.txt", "w").write(script)
