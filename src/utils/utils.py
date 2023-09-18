@@ -107,7 +107,7 @@ def get_article_data_from_wikipedia(keyword: str) -> None:
     for word in words:
         if keyword == word:
             content = wikipedia.page(words[0]).content
-            open(f"{keyword}.txt", "w").write(content)
+            open(f"data/{keyword}.txt", "w").write(content)
             break
 
 
