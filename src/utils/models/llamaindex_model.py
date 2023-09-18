@@ -61,7 +61,7 @@ class LlamaindexChatBot(ChatbotTrainingBase):
         self.query_engine = self.index.as_query_engine(
             service_context=self.service_context
         )
-        self.save_question_and_answer("llama_index_result.csv")
+        self.save_question_and_answer("output/llama_index_result.csv")
         self.save_model()
 
     def save_question_and_answer(self, file_name: str):

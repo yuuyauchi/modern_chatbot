@@ -6,7 +6,7 @@ def main():
     model.read()
     model.tokenize()
     model.train()
-    model.evaluate("llama_index_result.csv")
+    model.evaluate("output/llama_index_result.csv")
 
 
 if __name__ == "__main__":
