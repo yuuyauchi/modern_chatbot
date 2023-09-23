@@ -241,7 +241,7 @@ def get_finetune_input():
             dataset.append(template)
     df = pd.DataFrame(dataset)
     df.to_json("input_data.jsonl", force_ascii=False, lines=True, orient="records")
-
+    # TODO データ作成箇所とモデル生成箇所の処理を別関数として分ける。
     upload_response = openai.File.create(
         file=open("input_data.jsonl", "rb"), purpose="fine-tune"
     )
