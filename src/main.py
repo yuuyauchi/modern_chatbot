@@ -1,5 +1,6 @@
-from utils.models.llamaindex_model import LlamaindexChatBot
 from utils.models.langchain_model import LangChainChatBot
+
+# from utils.models.llamaindex_model import LlamaindexChatBot
 
 
 def main():
