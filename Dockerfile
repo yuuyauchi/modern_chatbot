@@ -12,7 +12,9 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \ 
     libreadline-dev \
     libsqlite3-dev \
-    libmagic-dev
+    libmagic-dev \
+    unstructured \
+    chromadb
 
 RUN wget https://www.python.org/ftp/python/3.10.9/Python-3.10.9.tgz && \
     tar -xvf Python-3.10.9.tgz && \
