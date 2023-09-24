@@ -136,10 +136,9 @@ def get_youtube_video_ids(channel_id: str) -> List[str]:
     for response in search_response["items"]:
         if response["id"]["kind"] != "youtube#video":
             continue
-
-        video_url = youtube_url + response["id"]["videoId"]
-        url_list.append(video_url)
-    return url_list
+        video_url = response["id"]["videoId"]
+        video_list.append(video_url)
+    return video_list
 
 
 def generate_answer(prompt: str):
@@ -254,10 +253,6 @@ def get_finetune_input():
     )
     print(fine_tune_response)
 
-        video_url = response["id"]["videoId"]
-        video_list.append(video_url)
-    return video_list
-
 
 def generate_data_from_youtube(channel_id: str) -> None:
     video_ids = get_youtube_video_ids(channel_id)
@@ -270,4 +265,3 @@ def generate_data_from_youtube(channel_id: str) -> None:
                 script_list.append(text_dict["text"])
             script = "".join(script_list)
             open(f"data/{video_id}.txt", "w").write(script)
-
