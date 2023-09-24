@@ -4,15 +4,20 @@ import requests
 from llama_hub.youtube_transcript import YoutubeTranscriptReader, is_youtube_video
 from llama_index import SimpleWebPageReader
 from llama_index.schema import Document
-from utils.utils import get_youtube_video_urls
+from utils.utils import get_youtube_video_ids
 
 
 class YoutubeReader:
     def __init__(self):
         pass
 
-    def get_video_from_channel_id(self, channel_id: str):
-        self.urls = get_youtube_video_urls(channel_id)
+    def get_video_from_channel_id(self, channel_id: str) -> None:
+        self.video_ids = get_youtube_video_ids(channel_id)
+
+    def get_urls_from_channel_id(self, channel_id: str) -> None:
+        video_ids = self.get_video_from_channel_id(channel_id)
+        youtube_path = "https://www.youtube.com/watch?v="
+        self.urls = [f"{youtube_path}{video_id}" for video_id in video_ids]
 
     def check_url(self) -> None:
         for url in self.urls:
