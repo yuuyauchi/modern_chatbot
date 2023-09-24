@@ -4,6 +4,8 @@ import re
 from os.path import dirname, join
 from typing import List
 
+import openai
+import pandas as pd
 import requests
 import wikipedia
 from dotenv import load_dotenv
@@ -24,6 +26,7 @@ def setting():
 
 
 env = setting()
+openai.api_key = env["OPENAI_API_KEY"]
 API_KEY = env["API_KEY"]
 CUSTOM_SEARCH_ENGINE_ID = env["CUSTOM_SEARCH_ENGINE_ID"]
 
@@ -136,6 +139,119 @@ def get_youtube_video_ids(channel_id: str) -> List[str]:
         video_url = response["id"]["videoId"]
         video_list.append(video_url)
     return video_list
+
+
+def generate_answer(prompt: str):
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        temperature=0.7,
+        max_tokens=1024,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+    )
+    answer = response.choices[0].text.strip()
+    return answer
+
+
+def generate_prompt(name: str, description: str):
+    # TODO: プロンプロエンジニアリングによる精度改善
+    return f"""
+                以下の文章は作成してほしい「質問と回答」の具体例です。
+                ＊具体例
+                Q.BJ・ペンはいつUFCデビューを果たしたか？\n
+                A.BJ・ペンは2001年2月23日のUFC 34でUFCデビューを果たした。
+
+                上記の具体例の文章を参考に以下の{name}に関する文章から質問と解のペアをできる限り多く作成してください。
+                {description}
+            """
+
+
+def generate_finetuning_input() -> None:
+    if os.path.exists("qa.json"):
+        qa_dict = json.load(open("qa.json", "r", encoding="utf-8"))
+    else:
+        qa_dict = {}
+    files = os.listdir("data")
+
+    for file in files:
+        f = open(f"data/{file}", "r", encoding="UTF-8")
+        data = f.read()
+        descriptions = data.split("\n\n")
+        name = file[:-3]
+        if name in qa_dict.keys():
+            print("skip:", name)
+            continue
+        qa_list = []
+        print(name)
+        for description in descriptions:
+            try:
+                prompt = generate_prompt(name, description)
+                response = generate_answer(prompt)
+                qa_list.append(response)
+            except Exception:
+                # TODO: try except構文ではなくトークン数のif文を用いる。
+                print(len(description))
+                splitted_text = description.split("\n")
+                chunk_size = int(len(splitted_text) / 2)
+                first_chunk = "".join(splitted_text[:chunk_size])
+                second_chunk = "".join(splitted_text[chunk_size:])
+                prompt = generate_prompt(name, first_chunk)
+                response = generate_answer(prompt)
+                qa_list.append(response)
+                prompt = generate_prompt(name, second_chunk)
+                response = generate_answer(prompt)
+                qa_list.append(response)
+                continue
+        qa_dict[name] = qa_list
+        with open("qa.json", mode="w") as f:
+            d = json.dumps(qa_dict, ensure_ascii=False)
+            f.write(d)
+
+
+def get_finetune_template(content, question, answer):
+    template = {
+        "messages": [
+            {"role": "system", "content": content},
+            {"role": "user", "content": question},
+            {"role": "assistant", "content": answer},
+        ]
+    }
+    return template
+
+
+def get_finetune_input():
+    if os.path.exists("qa.json"):
+        qa_dict = json.load(open("qa.json", "r", encoding="utf-8"))
+    else:
+        qa_dict = {}
+
+    qa_list = []
+    dataset = []
+    for qa in qa_dict.values():
+        qa_list.extend(qa)
+
+    for qa in qa_list:
+        qa_str_list = list(filter(lambda string: string != "", qa.split("\n")))
+        it = iter(qa_str_list)
+        for question, answer in zip(it, it):
+            if "Q" not in question or "A" not in answer:
+                continue
+            content = "あなたは格闘技について最新の情報を知っているチャットボットです。"
+            template = get_finetune_template(content, question, answer)
+            dataset.append(template)
+    df = pd.DataFrame(dataset)
+    df.to_json("input_data.jsonl", force_ascii=False, lines=True, orient="records")
+    # TODO データ作成箇所とモデル生成箇所の処理を別関数として分ける。
+    upload_response = openai.File.create(
+        file=open("input_data.jsonl", "rb"), purpose="fine-tune"
+    )
+    file_id = upload_response.id
+    fine_tune_response = openai.FineTuningJob.create(
+        training_file=file_id, model="gpt-3.5-turbo"
+    )
+    print(fine_tune_response)
 
 
 def generate_data_from_youtube(channel_id: str) -> None:
