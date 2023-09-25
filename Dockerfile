@@ -43,9 +43,11 @@ RUN pip install pysen \
     youtube_transcript_api \
     llama_hub \
     streamlit \
+    transformers \
     unstructured \
     chromadb
-    transformers 
+
+    
 
 WORKDIR /workspaces/modern_chatbot
 COPY . /workspaces/modern_chatbot/
