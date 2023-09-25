@@ -23,7 +23,7 @@ class LangChainChatBot(ChatbotTrainingBase):
     model_path: str = "storage"
 
     def read(self):
-        self.loader = DirectoryLoader("data1")
+        self.loader = DirectoryLoader(self.data_path)
 
     def tokenize(self):
         # TODO 正答の精度を上げるために異なるsplitterも試す。
@@ -39,10 +39,7 @@ class LangChainChatBot(ChatbotTrainingBase):
             embedding=OpenAIEmbeddings(),
             text_splitter=self.text_splitter,
         ).from_loaders([self.loader])
-        import pdb
-
-        pdb.set_trace()
-        self.index.query()
+        # self.index.query()
 
     def evaluate(self):
         pass
