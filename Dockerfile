@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     libbz2-dev \ 
     libreadline-dev \
     libsqlite3-dev \
-    libmagic-dev
+    libmagic-dev 
 
 RUN wget https://www.python.org/ftp/python/3.10.9/Python-3.10.9.tgz && \
     tar -xvf Python-3.10.9.tgz && \
@@ -43,7 +43,11 @@ RUN pip install pysen \
     youtube_transcript_api \
     llama_hub \
     streamlit \
-    transformers 
+    transformers \
+    unstructured \
+    chromadb
+
+    
 
 WORKDIR /workspaces/modern_chatbot
 COPY . /workspaces/modern_chatbot/
