@@ -45,6 +45,7 @@ RUN pip install pysen \
     streamlit \
     unstructured \
     chromadb
+    transformers 
 
 WORKDIR /workspaces/modern_chatbot
 COPY . /workspaces/modern_chatbot/
