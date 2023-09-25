@@ -39,5 +39,5 @@ python src/main.py
 
 ②以下のコマンドで学習したモデルを用いて、chatbot用のUIをローカルサーバー上に作成する。
 ```
-python src/deploy.py
+streamlit run src/deploy.py
 ```
