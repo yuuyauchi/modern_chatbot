@@ -21,15 +21,11 @@ class TinySegmenterTextSplitter(MetadataAwareTextSplitter):
         default=DEFAULT_CHUNK_OVERLAP,
         description="The token overlap of each chunk when splitting.",
     )
-    separator: str = Field(
-        default=" ", description="Default separator for splitting into words"
-    )
+    separator: str = Field(default=" ", description="Default separator for splitting into words")
     backup_separators: List = Field(
         default_factory=list, description="Additional separators for splitting."
     )
-    callback_manager: CallbackManager = Field(
-        default_factory=CallbackManager, exclude=True
-    )
+    callback_manager: CallbackManager = Field(default_factory=CallbackManager, exclude=True)
     tokenizer: Callable = Field(
         default_factory=globals_helper.tokenizer,  # type: ignore
         description="Tokenizer for splitting words into tokens.",
@@ -76,9 +72,7 @@ class TinySegmenterTextSplitter(MetadataAwareTextSplitter):
 
     def split_text_metadata_aware(self, text: str, metadata_str: str) -> List[str]:
         """Split text into chunks, reserving space required for metadata str."""
-        metadata_len = (
-            len(self.tokenizer.tokenize(metadata_str)) + DEFAULT_METADATA_FORMAT_LEN
-        )
+        metadata_len = len(self.tokenizer.tokenize(metadata_str)) + DEFAULT_METADATA_FORMAT_LEN
         effective_chunk_size = self.chunk_size - metadata_len
         if effective_chunk_size <= 0:
             raise ValueError(

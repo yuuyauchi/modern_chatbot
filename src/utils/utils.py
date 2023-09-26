@@ -244,13 +244,9 @@ def get_finetune_input():
     df = pd.DataFrame(dataset)
     df.to_json("input_data.jsonl", force_ascii=False, lines=True, orient="records")
     # TODO データ作成箇所とモデル生成箇所の処理を別関数として分ける。
-    upload_response = openai.File.create(
-        file=open("input_data.jsonl", "rb"), purpose="fine-tune"
-    )
+    upload_response = openai.File.create(file=open("input_data.jsonl", "rb"), purpose="fine-tune")
     file_id = upload_response.id
-    fine_tune_response = openai.FineTuningJob.create(
-        training_file=file_id, model="gpt-3.5-turbo"
-    )
+    fine_tune_response = openai.FineTuningJob.create(training_file=file_id, model="gpt-3.5-turbo")
     print(fine_tune_response)
 
 
