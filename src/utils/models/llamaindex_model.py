@@ -47,9 +47,7 @@ class LlamaindexChatBot(ChatbotTrainingBase):
         )
 
         self.node_parser = SimpleNodeParser(text_splitter=self.text_splitter)
-        llm_predictor = LLMPredictor(
-            llm=ChatOpenAI(temperature=0, model_name=self.model_name)
-        )
+        llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name=self.model_name))
         self.service_context = ServiceContext.from_defaults(
             llm_predictor=llm_predictor, node_parser=self.node_parser
         )
@@ -58,9 +56,7 @@ class LlamaindexChatBot(ChatbotTrainingBase):
         self.index = GPTVectorStoreIndex.from_documents(
             self.documents, service_context=self.service_context
         )
-        self.query_engine = self.index.as_query_engine(
-            service_context=self.service_context
-        )
+        self.query_engine = self.index.as_query_engine(service_context=self.service_context)
         self.save_question_and_answer("llama_index_result.csv")
         self.save_model()
 
@@ -78,22 +74,16 @@ class LlamaindexChatBot(ChatbotTrainingBase):
         df = pd.read_csv(file_name)
         storage_context = StorageContext.from_defaults(
             docstore=SimpleDocumentStore.from_persist_dir(persist_dir=self.model_path),
-            vector_store=SimpleVectorStore.from_persist_dir(
-                persist_dir=self.model_path
-            ),
+            vector_store=SimpleVectorStore.from_persist_dir(persist_dir=self.model_path),
             index_store=SimpleIndexStore.from_persist_dir(persist_dir=self.model_path),
         )
         vector_store_index = load_index_from_storage(
             storage_context, service_context=self.service_context
         )
-        self.query_engine = vector_store_index.as_query_engine(
-            service_context=self.service_context
-        )
+        self.query_engine = vector_store_index.as_query_engine(service_context=self.service_context)
         self.evaluator = ResponseEvaluator(service_context=self.service_context)
         df["response"] = df["query"].apply(lambda query: self.query_engine.query(query))
-        df["label"] = df["response"].apply(
-            lambda response: str(self.evaluator.evaluate(response))
-        )
+        df["label"] = df["response"].apply(lambda response: str(self.evaluator.evaluate(response)))
         df.to_csv(file_name, index=False)
 
     @classmethod
@@ -101,9 +91,7 @@ class LlamaindexChatBot(ChatbotTrainingBase):
         text_splitter = TinySegmenterTextSplitter()
 
         node_parser = SimpleNodeParser(text_splitter=text_splitter)
-        llm_predictor = LLMPredictor(
-            llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
-        )
+        llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
         service_context = ServiceContext.from_defaults(
             llm_predictor=llm_predictor, node_parser=node_parser
         )
@@ -115,9 +103,7 @@ class LlamaindexChatBot(ChatbotTrainingBase):
         vector_store_index = load_index_from_storage(
             storage_context, service_context=service_context
         )
-        query_engine = vector_store_index.as_query_engine(
-            service_context=service_context
-        )
+        query_engine = vector_store_index.as_query_engine(service_context=service_context)
         return query_engine
 
     def save_model(self):
