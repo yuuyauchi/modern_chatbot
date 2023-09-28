@@ -1,7 +1,6 @@
 import streamlit as st
 from utils.models.langchain_model import LangChainChatBot
 
-
 chatbot = LangChainChatBot()
 chatbot.read_data()
 chatbot.preprocess()
