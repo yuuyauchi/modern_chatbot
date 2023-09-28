@@ -1,14 +1,14 @@
-from utils.models.langchain_model import LangChainChatBot
+# from utils.models.langchain_model import LangChainChatBot
 
-# from utils.models.llamaindex_model import LlamaindexChatBot
+from utils.models.llamaindex_model import LlamaindexChatBot
 
 
 def main():
-    model = LangChainChatBot()
-    model.read()
-    model.tokenize()
-    model.train()
-    # model.evaluate("llama_index_result.csv")
+    model = LlamaindexChatBot()
+    model.read_data()
+    model.preprocess()
+    model.generate_engine()
+    # model.evaluate("llamaindex_result.csv")
 
 
 if __name__ == "__main__":

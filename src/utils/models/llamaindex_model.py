@@ -20,7 +20,8 @@ from llama_index.storage.docstore import SimpleDocumentStore
 from llama_index.storage.index_store import SimpleIndexStore
 from llama_index.vector_stores import SimpleVectorStore
 from utils.models.chatbot_base import ChatbotTrainingBase
-from utils.preprocessing.textsplit import TinySegmenterTextSplitter
+
+# from utils.preprocessing.textsplit import TinySegmenterTextSplitter
 from utils.utils import setting
 
 segmenter = tinysegmenter.TinySegmenter()
@@ -31,14 +32,14 @@ openai.api_key = env["OPENAI_API_KEY"]
 
 @dataclass
 class LlamaindexChatBot(ChatbotTrainingBase):
-    data_path: str = "data"
+    data_path: str = "sample_data"
     model_name: str = "gpt-3.5-turbo"
     model_path: str = "storage"
 
-    def read(self):
+    def read_data(self):
         self.documents = SimpleDirectoryReader(input_dir=self.data_path).load_data()
 
-    def tokenize(self):
+    def preprocess(self):
         self.text_splitter = TokenTextSplitter(
             separator="。",
             chunk_size=DEFAULT_CHUNK_SIZE,
@@ -52,13 +53,12 @@ class LlamaindexChatBot(ChatbotTrainingBase):
             llm_predictor=llm_predictor, node_parser=self.node_parser
         )
 
-    def train(self):
+    def generate_engine(self):
         self.index = GPTVectorStoreIndex.from_documents(
             self.documents, service_context=self.service_context
         )
         self.query_engine = self.index.as_query_engine(service_context=self.service_context)
-        self.save_question_and_answer("llama_index_result.csv")
-        self.save_model()
+        self.index.storage_context.persist(self.model_path)
 
     def save_question_and_answer(self, file_name: str):
         data_generator = DatasetGenerator.from_documents(self.documents)
@@ -88,7 +88,12 @@ class LlamaindexChatBot(ChatbotTrainingBase):
 
     @classmethod
     def deploy(cls):
-        text_splitter = TinySegmenterTextSplitter()
+        text_splitter = TokenTextSplitter(
+            separator="。",
+            chunk_size=DEFAULT_CHUNK_SIZE,
+            chunk_overlap=DEFAULT_CHUNK_OVERLAP,
+            backup_separators=["、", "\n"],
+        )
 
         node_parser = SimpleNodeParser(text_splitter=text_splitter)
         llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
@@ -105,7 +110,3 @@ class LlamaindexChatBot(ChatbotTrainingBase):
         )
         query_engine = vector_store_index.as_query_engine(service_context=service_context)
         return query_engine
-
-    def save_model(self):
-        # self.index.set_index_id("vector_index")
-        self.index.storage_context.persist(self.model_path)

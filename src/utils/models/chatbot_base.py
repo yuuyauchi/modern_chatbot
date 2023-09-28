@@ -3,17 +3,13 @@ from abc import ABC, abstractmethod
 
 class ChatbotTrainingBase(ABC):
     @abstractmethod
-    def read(self):
+    def read_data(self):
         pass
 
     @abstractmethod
-    def tokenize(self, document):
+    def preprocess(self):
         pass
 
     @abstractmethod
-    def train(self, documents, node_parser):
-        pass
-
-    @abstractmethod
-    def evaluate(self):
+    def generate_engine(self, documents, node_parser):
         pass
