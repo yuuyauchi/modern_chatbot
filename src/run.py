@@ -1,7 +1,8 @@
+import argparse
+
 import streamlit as st
 from models.langchain_model import LangChainChatBot
 from models.llamaindex_model import LlamaindexChatBot
-import argparse
 
 parser = argparse.ArgumentParser(description="使用するモデルを記述")
 parser.add_argument("model_name")
