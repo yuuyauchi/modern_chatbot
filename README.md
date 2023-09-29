@@ -32,12 +32,12 @@ chatbot_project/
 ```
 ## 使用方法
 
-①以下のコマンドでLLMの学習を実行し、モデルを保存。
+①必要であれば以下のコマンドでLLMの学習を実行し、モデルを保存。
 ```
-python src/main.py
+python src/train.py
 ```
 
 ②以下のコマンドで学習したモデルを用いて、chatbot用のUIをローカルサーバー上に作成する。
 ```
-streamlit run src/deploy.py
+streamlit run run.py
 ```
