@@ -14,8 +14,8 @@ from langchain.indexes import VectorstoreIndexCreator
 # from langchain.llms import OpenAI
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
-from utils.models.chatbot_base import ChatbotTrainingBase
-from utils.utils import setting
+from models.chatbot_base import ChatbotTrainingBase
+from utils import setting
 
 segmenter = tinysegmenter.TinySegmenter()
 

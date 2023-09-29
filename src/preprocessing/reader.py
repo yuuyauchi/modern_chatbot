@@ -4,7 +4,7 @@ import requests
 from llama_hub.youtube_transcript import YoutubeTranscriptReader, is_youtube_video
 from llama_index import SimpleWebPageReader
 from llama_index.schema import Document
-from utils.utils import get_youtube_video_ids
+from utils import get_youtube_video_ids
 
 
 class YoutubeReader:

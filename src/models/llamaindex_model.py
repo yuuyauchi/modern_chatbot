@@ -19,10 +19,10 @@ from llama_index.node_parser import SimpleNodeParser
 from llama_index.storage.docstore import SimpleDocumentStore
 from llama_index.storage.index_store import SimpleIndexStore
 from llama_index.vector_stores import SimpleVectorStore
-from utils.models.chatbot_base import ChatbotTrainingBase
+from models.chatbot_base import ChatbotTrainingBase
 
-# from utils.preprocessing.textsplit import TinySegmenterTextSplitter
-from utils.utils import setting
+# from preprocessing.textsplit import TinySegmenterTextSplitter
+from utils import setting
 
 segmenter = tinysegmenter.TinySegmenter()
 

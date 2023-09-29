@@ -1,7 +1,21 @@
 import streamlit as st
-from utils.models.llamaindex_model import LlamaindexChatBot
+from models.langchain_model import LangChainChatBot
+from models.llamaindex_model import LlamaindexChatBot
+import argparse
 
-query_engine = LlamaindexChatBot.deploy()
+parser = argparse.ArgumentParser(description="使用するモデルを記述")
+parser.add_argument("model_name")
+args = parser.parse_args()
+
+if args.model_name == "llamaindex":
+    query_engine = LlamaindexChatBot.deploy()
+elif args.model_name == "langchain":
+    chatbot = LangChainChatBot()
+    chatbot.read_data()
+    chatbot.preprocess()
+    query_engine = chatbot.generate_engine()
+else:
+    raise NameError("モデル名の引数が間違っている或いは入力されていません。")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
