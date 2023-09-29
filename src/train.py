@@ -1,9 +1,9 @@
-# from utils.models.langchain_model import LangChainChatBot
+# from models.langchain_model import LangChainChatBot
 
-from utils.models.llamaindex_model import LlamaindexChatBot
+from models.llamaindex_model import LlamaindexChatBot
 
 
-def main():
+def train():
     model = LlamaindexChatBot()
     model.read_data()
     model.preprocess()
@@ -12,4 +12,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    train()
