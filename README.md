@@ -39,5 +39,5 @@ python src/train.py
 
 ②以下のコマンドで学習したモデルを用いて、chatbot用のUIをローカルサーバー上に作成する。
 ```
-streamlit run run.py
+streamlit run run.py モデル名 モデルID(なければ何でもよいが入力は必須)
 ```
